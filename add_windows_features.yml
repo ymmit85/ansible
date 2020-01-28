@@ -1,0 +1,14 @@
+---
+- name: Install Windows Feature
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Install NET-Framework-Core from file
+      win_feature:
+        name: NET-Framework-Core
+        source: \\dc1\sxs
+        state: present
+      register: output
+
+    - name: Task output
+      debug: msg="{{ output }}"
