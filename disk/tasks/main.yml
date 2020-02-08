@@ -1,0 +1,31 @@
+---
+- name: retrieve disk information
+  win_disk_facts:
+
+- name: initialize disk
+  win_shell: "Initialize-Disk -Number {{ item.number }}"
+  when: item['number'] != 0  and item['partition_style'] == "RAW"
+  loop: "{{ ansible_facts.disks }}"
+
+- name: retrieve disc information
+  win_disk_facts:
+
+- name: create partition
+  win_partition:
+    drive_letter: "{{ disk_lookup[item.number] }}"
+    partition_size: -1
+    disk_number: "{{ item.number }}"
+  when: item['number'] != 0 and item['operational_status'] == "Online" and item['partitions.drive_letter'] is not defined and item['partition_style'] == "GPT"
+  loop: "{{ ansible_facts.disks }}"
+
+- name: retrieve disc information
+  win_disk_facts:
+
+- name: Full format the newly created partition as NTFS and label it
+  win_format:
+    drive_letter: "{{ disk_lookup[item.number] }}"
+    file_system: NTFS
+    new_label: "{{ disk_lookup[item.number] }}"
+    full: False
+  when: item['number'] != 0 and item['operational_status'] == "Online" and item['partitions.drive_letter'] is not defined and item['partition_style'] == "GPT"
+  loop: "{{ ansible_facts.disks }}"
